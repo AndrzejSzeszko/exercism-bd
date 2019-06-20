@@ -5,9 +5,8 @@ from bs4 import BeautifulSoup
 
 
 class DetailDownloader:
-    __login_url = 'https://exercism.io/users/sign_in'
-    __tracks_url = 'https://exercism.io/tracks'
-    __all_tracks = []
+    __LOGIN_URL = 'https://exercism.io/users/sign_in'
+    __TRACKS_URL = 'https://exercism.io/tracks'
 
     def __init__(self, track, group=None, difficulty=None, status=None, email=None, password=None):
         self.crawling_url = 'https://exercism.io/my/tracks/' + track.strip()
@@ -28,21 +27,24 @@ class DetailDownloader:
             #     print(side_exercise)
 
     def __get_after_log_in_soup(self, session):
-        request = session.get(self.__login_url)
+        request = session.get(self.__LOGIN_URL)
         soup = BeautifulSoup(request.content, 'html.parser')
         authenticity_token = soup.find(
             'input', 
             attrs={'name': 'authenticity_token'}
             )['value']
         self.credentials['authenticity_token'] = authenticity_token
-        request = session.post(self.__login_url, data=self.credentials)
+        request = session.post(self.__LOGIN_URL, data=self.credentials)
         return BeautifulSoup(request.content, 'html.parser')
 
-    def __populate_tracks(self):
-        request = requests.get(self.__tracks_url)
+    @property
+    def __all_tracks(self):
+        request = requests.get(self.__TRACKS_URL)
         soup = BeautifulSoup(request.content, 'html.parser')
-        all_tracks = soup.findall('div', )
-        self.__all_tracks = 
+        all_tracks_h2 = soup.find_all('h2')
+        return tuple(track.text for track in all_tracks_h2)
+
+    
 
 if __name__ == '__main__':
     track = 'python'
