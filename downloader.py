@@ -109,7 +109,7 @@ def __get_exercises_not_logged_in(session, tracks):
 
     return exercises_by_track
 
-def download_exercises(*tracks, group=None, difficulty=None, status=None, email=None, password=None):
+def download_exercises(tracks=None, group=None, difficulty=None, status=None, email=None, password=None):
     conditions = []
     if group:
         conditions.append('group')
@@ -139,5 +139,5 @@ def download_exercises(*tracks, group=None, difficulty=None, status=None, email=
                 output = subprocess.run(command.split(), capture_output=True)
                 stderr = output.stderr.decode('UTF-8').strip()
                 stdout = output.stdout.decode('UTF-8').strip()
-                message = f'Track: {track}, exercise: {exercise}\n{stderr}\n{stdout}\n'
+                message = f'Track: {track}, Exercise: {exercise}\n{stderr}\n{stdout}\n'
                 print(message)
