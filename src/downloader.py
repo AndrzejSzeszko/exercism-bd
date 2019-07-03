@@ -109,15 +109,22 @@ def __get_exercises_not_logged_in(session, tracks):
 
     return exercises_by_track
 
-def download_exercises(tracks=None, group=None, difficulty=None, status=None, email=None, password=None):
-    conditions = []
-    if group:
-        conditions.append('group')
-    if difficulty:
-        conditions.append('difficulty')
-    if status:
-        conditions.append('status')
+def __run_exercism_download(exercises_by_track, group, difficulty, status):
+    for track, exercises in exercises_by_track.items():
+        for exercise_name, exercise_properties in exercises.items():
+            group_condition_met = exercise_properties['group'] == group if group else True
+            difficulty_condition_met = exercise_properties['difficulty'] == difficulty if difficulty else True
+            status_condition_met = exercise_properties['status'] == status if status else True
 
+            if group_condition_met and difficulty_condition_met and status_condition_met:
+                command = f'exercism download --track {track} --exercise {exercise_name}'
+                output = subprocess.run(command.split(), capture_output=True)
+                stderr = output.stderr.decode('UTF-8').strip()
+                stdout = output.stdout.decode('UTF-8').strip()
+                message = f'Track: {track}, Exercise: {exercise_name}\n{stderr}\n{stdout}\n'
+                print(message)
+
+def download_exercises(tracks=None, group=None, difficulty=None, status=None, email=None, password=None):
     session = requests.Session()
     tracks = tracks if tracks else __get_all_tracks()
     exercises_not_logged_in = __get_exercises_not_logged_in(session, tracks)
@@ -128,16 +135,5 @@ def download_exercises(tracks=None, group=None, difficulty=None, status=None, em
         exercises_logged_in = __get_exercises_logged_in(session, tracks, exercises_not_logged_in)
 
     exercises_by_track = exercises_logged_in if is_user_logged_in else exercises_not_logged_in
-    for track, exercises in exercises_by_track.items():
-        for exercise, properties in exercises.items():
-            group_condition_met = properties['group'] == group if 'group' in conditions else True
-            difficulty_condition_met = properties['difficulty'] == difficulty if 'difficulty' in conditions else True
-            status_condition_met = properties['status'] == status if 'status' in conditions else True
 
-            if group_condition_met and difficulty_condition_met and status_condition_met:
-                command = f'exercism download --track {track} --exercise {exercise}'
-                output = subprocess.run(command.split(), capture_output=True)
-                stderr = output.stderr.decode('UTF-8').strip()
-                stdout = output.stdout.decode('UTF-8').strip()
-                message = f'Track: {track}, Exercise: {exercise}\n{stderr}\n{stdout}\n'
-                print(message)
+    __run_exercism_download(exercises_by_track, group, difficulty, status)
