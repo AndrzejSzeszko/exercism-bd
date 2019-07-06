@@ -1,3 +1,4 @@
+import re
 import subprocess
 import requests
 
@@ -6,22 +7,27 @@ from bs4 import BeautifulSoup
 from constants import (
     LOGIN_URL,
     CRAWLING_URL_PATTERN_NOT_LOGGED_IN,
-    CRAWLING_URL_PATTERN_LOGGED_IN,
-    STRINGS_REPLACEMENTS
+    CRAWLING_URL_PATTERN_LOGGED_IN
 )
 
 
 def __make_raw_name_cli_usable(raw_name):
-    name = raw_name.strip().lower()
-    for string, replacement in STRINGS_REPLACEMENTS:
-        name = name.replace(string, replacement)
-    return name
+    return re.sub('^exercise-', '', raw_name)
+
+def __extract_last_chunk_of_href(href):
+    return re.search('[^/]+$', href).group()
 
 def __get_all_tracks():
     request = requests.get(CRAWLING_URL_PATTERN_NOT_LOGGED_IN)
     soup = BeautifulSoup(request.content, 'html.parser')
-    all_tracks_h2s = soup.find_all('h2')
-    return tuple(track.text for track in all_tracks_h2s)
+    exercises_links = soup.find_all('a', class_='track')
+
+    all_tracks = []
+    for link in exercises_links:
+        href = link.attrs.get('href')
+        all_tracks.append(__extract_last_chunk_of_href(href))
+
+    return all_tracks
 
 def __log_in(session, email, password):
     request = session.get(LOGIN_URL)
@@ -41,8 +47,8 @@ def __get_exercises(crawling_soup):
 
     exercises = {}
     for exercise_tag in exercises_tags:
-        raw_name = exercise_tag.find('h3').text
-        name = __make_raw_name_cli_usable(raw_name)
+        href = exercise_tag.attrs.get('href')
+        name = __extract_last_chunk_of_href(href)
         difficulty = exercise_tag.find(class_='difficulty').text
         exercises[name] = {
             'difficulty': difficulty,
@@ -117,7 +123,7 @@ def __run_exercism_download(exercises_by_track, group, difficulty, status):
             status_condition_met = exercise_properties['status'] == status if status else True
 
             if group_condition_met and difficulty_condition_met and status_condition_met:
-                command = f'exercism download --track {track} --exercise {exercise_name}'
+                command = f'exercism download --track={track} --exercise={exercise_name}'
                 output = subprocess.run(command.split(), capture_output=True)
                 stderr = output.stderr.decode('UTF-8').strip()
                 stdout = output.stdout.decode('UTF-8').strip()
@@ -135,5 +141,6 @@ def download_exercises(tracks=None, group=None, difficulty=None, status=None, em
         exercises_logged_in = __get_exercises_logged_in(session, tracks, exercises_not_logged_in)
 
     exercises_by_track = exercises_logged_in if is_user_logged_in else exercises_not_logged_in
-
     __run_exercism_download(exercises_by_track, group, difficulty, status)
+
+    print('done')
