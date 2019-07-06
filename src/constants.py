@@ -1,7 +1,7 @@
 LOGIN_URL = 'https://exercism.io/users/sign_in'
 
-CRAWLING_URL_PATTERN_NOT_LOGGED_IN = 'https://exercism.io/tracks/'
-CRAWLING_URL_PATTERN_LOGGED_IN = 'https://exercism.io/my/tracks/'
+CRAWLING_URL_PATTERN_NOT_LOGGED_IN = 'https://exercism.io/tracks'
+CRAWLING_URL_PATTERN_LOGGED_IN = 'https://exercism.io/my/tracks'
 
 ALLOWED_STATUSES = {
     'completed': 'completed',

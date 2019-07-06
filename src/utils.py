@@ -117,13 +117,13 @@ def get_all_tracks():
 def get_exercises_logged_in(session, tracks, exercises_not_logged_in):
     exercises_by_track = {}
     for track in tracks:
-        crawling_url = CRAWLING_URL_PATTERN_LOGGED_IN + track
+        crawling_url = f'{CRAWLING_URL_PATTERN_LOGGED_IN}/{track}'
         request = session.get(crawling_url)
         crawling_soup = BeautifulSoup(request.content, 'html.parser')
 
         core_exercises = __get_core_exercises(crawling_soup, exercises_not_logged_in[track])
         side_exercises = __get_side_exercises(crawling_soup)
-        exercises_by_track[track] = dict(**core_exercises, **side_exercises)
+        exercises_by_track[track] = {**core_exercises, **side_exercises}
 
     return exercises_by_track
 
@@ -131,7 +131,7 @@ def get_exercises_logged_in(session, tracks, exercises_not_logged_in):
 def get_exercises_not_logged_in(session, tracks):
     exercises_by_track = {}
     for track in tracks:
-        crawling_url = CRAWLING_URL_PATTERN_NOT_LOGGED_IN + track + '/exercises'
+        crawling_url = f'{CRAWLING_URL_PATTERN_NOT_LOGGED_IN}/{track}/exercises'
         request = session.get(crawling_url)
         crawling_soup = BeautifulSoup(request.content, 'html.parser')
 
@@ -151,7 +151,9 @@ def run_exercism_download(exercises_by_track, group, difficulty, status):
             if group_condition_met and difficulty_condition_met and status_condition_met:
                 command = f'exercism download --track={track} --exercise={exercise_name}'
                 output = subprocess.run(command.split(), capture_output=True)
-                stderr = output.stderr.decode('UTF-8').strip()
-                stdout = output.stdout.decode('UTF-8').strip()
-                message = f'Track: {track}, Exercise: {exercise_name}\n{stderr}\n{stdout}\n'
+                exercism_cli_stderr = output.stderr.decode('UTF-8').strip()
+                exercism_cli_stdout = output.stdout.decode('UTF-8').strip()
+                message = f'Track: {track}, Exercise: {exercise_name}\n' \
+                          f'{exercism_cli_stderr}\n' \
+                          f'{exercism_cli_stdout}\n'
                 print(message)
