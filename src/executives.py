@@ -2,8 +2,6 @@ import os
 import json
 import requests
 
-from json.decoder import JSONDecodeError
-from constants import CANNOT_READ_CONFIG_FILE_MESSAGE
 from utils import (
     log_in,
     get_all_tracks,
@@ -12,20 +10,24 @@ from utils import (
     get_exercises_logged_in,
     run_exercism_download,
     get_exercism_workspace_path,
-    get_credentials_from_config_file
+    intercept_credentials,
+    get_credentials
 )
 
 
-def download_exercises(tracks=None, group=None, difficulty=None, status=None, email=None, password=None):
+def download_exercises(tracks=None, group=None, difficulty=None, status=None):
     session = requests.Session()
     tracks = tracks if tracks else get_all_tracks()
     exercises_not_logged_in = get_exercises_not_logged_in(session, tracks)
 
     user_logged_in = False
-    if email or password:
+    if status or group:
+        email, password = get_credentials()
         user_logged_in = log_in(session, email, password)
         if not user_logged_in:
+            print('Check if you provided correct credentials (when prompted or via configuration file). \n')
             return
+
         exercises_logged_in = get_exercises_logged_in(session, tracks, exercises_not_logged_in)
 
     exercises_by_track = exercises_logged_in if user_logged_in else exercises_not_logged_in
@@ -39,23 +41,25 @@ def list_all_tracks():
         print(track)
 
 
-def list_my_tracks(email, password):
-    if not (email and password):
-        try:
-            email, password = get_credentials_from_config_file()
-        except (FileNotFoundError, JSONDecodeError):
-            print(CANNOT_READ_CONFIG_FILE_MESSAGE)
-            return
+def list_my_tracks():
+    email, password = get_credentials()
 
     for track in get_my_tracks(email, password):
         print(track)
 
 
-def configure(email, password):
+def configure():
+    email, password = intercept_credentials()
+
+    session = requests.Session()
+    user_logged_in = log_in(session, email, password)
+    if not user_logged_in:
+        print('Check if you provided correct credentials when prompted. \n')
+        return
+
     exercism_workspace_path = get_exercism_workspace_path()
-    exercism_bd_workspace_path = os.path.join(exercism_workspace_path, 'exercism-bd')
-    os.makedirs(exercism_bd_workspace_path, exist_ok=True)
-    config_file_path = os.path.join(exercism_bd_workspace_path, 'config.json')
+    config_file_path = os.path.join(exercism_workspace_path, 'exercism-bd', '.config.json')
+    os.makedirs(os.path.dirname(config_file_path), exist_ok=True)
 
     with open(config_file_path, 'w+') as config_file:
         config_file.seek(0)
@@ -64,4 +68,4 @@ def configure(email, password):
         config_data = {'email': email, 'password': password}
         json.dump(config_data, config_file, indent=4)
 
-    print('Email and password saved.\n')
+    print('\nEmail and password saved.\n')

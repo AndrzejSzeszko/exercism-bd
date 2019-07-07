@@ -4,6 +4,8 @@ import json
 import subprocess
 import requests
 
+from getpass import getpass
+from json.decoder import JSONDecodeError
 from bs4 import BeautifulSoup
 
 from constants import (
@@ -72,6 +74,32 @@ def __get_side_exercises(crawling_soup):
             'status': status
         }
     return side_exercises
+
+
+def __get_credentials_from_config_file():
+    exercism_workspace_path = get_exercism_workspace_path()
+    config_file_path = os.path.join(exercism_workspace_path, 'exercism-bd', '.config.json')
+
+    with open(config_file_path, 'r') as config_file:
+        config_data = json.load(config_file)
+        email = config_data['email']
+        password = config_data['password']
+
+    return email, password
+
+
+def intercept_credentials():
+    email = input('Provide email: ')
+    password = getpass('Provide password: ')
+    return email, password
+
+
+def get_credentials():
+    try:
+        email, password = __get_credentials_from_config_file()
+    except (FileNotFoundError, JSONDecodeError, KeyError):
+        email, password = intercept_credentials()
+    return email, password
 
 
 def log_in(session, email, password):
@@ -170,15 +198,3 @@ def get_exercism_workspace_path():
     command = 'exercism workspace'
     output = subprocess.run(command.split(), capture_output=True)
     return output.stdout.decode('UTF-8').strip()
-
-
-def get_credentials_from_config_file():
-    exercism_workspace_path = get_exercism_workspace_path()
-    config_file_path = os.path.join(exercism_workspace_path, 'exercism-bd', 'config.json')
-
-    with open(config_file_path, 'r') as config_file:
-        config_data = json.load(config_file)
-        email = config_data.get('email')
-        password = config_data.get('password')
-
-    return email, password
