@@ -1,4 +1,6 @@
 import re
+import os
+import json
 import subprocess
 import requests
 
@@ -8,6 +10,7 @@ from constants import (
     LOGIN_URL,
     CRAWLING_URL_PATTERN_NOT_LOGGED_IN,
     CRAWLING_URL_PATTERN_LOGGED_IN,
+    AUTHENTICATION_FAILED_MESSAGE,
     ALLOWED_STATUSES
 )
 
@@ -82,7 +85,11 @@ def log_in(session, email, password):
         }
     request = session.post(LOGIN_URL, data=credentials)
     soup = BeautifulSoup(request.content, 'html.parser')
-    return bool(soup.find(class_='logged-in'))
+    user_logged_in = bool(soup.find(class_='logged-in'))
+    if not user_logged_in:
+        print(AUTHENTICATION_FAILED_MESSAGE)
+        return False
+    return True
 
 
 def get_my_tracks(email, password):
@@ -157,3 +164,21 @@ def run_exercism_download(exercises_by_track, group, difficulty, status):
                           f'{exercism_cli_stderr}\n' \
                           f'{exercism_cli_stdout}\n'
                 print(message)
+
+
+def get_exercism_workspace_path():
+    command = 'exercism workspace'
+    output = subprocess.run(command.split(), capture_output=True)
+    return output.stdout.decode('UTF-8').strip()
+
+
+def get_credentials_from_config_file():
+    exercism_workspace_path = get_exercism_workspace_path()
+    config_file_path = os.path.join(exercism_workspace_path, 'exercism-bd', 'config.json')
+
+    with open(config_file_path, 'r') as config_file:
+        config_data = json.load(config_file)
+        email = config_data.get('email')
+        password = config_data.get('password')
+
+    return email, password
