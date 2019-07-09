@@ -24,3 +24,15 @@ ALLOWED_GROUPS = {
     'core': 'core',
     'side': 'side'
 }
+
+# TODO: logging insted of printing ?
+# TODO: tests
+# TODO: colored help message
+# TODO: verbose/qiuet (decoretors metaprogramming)
+# TODO: statusbar
+# TODO: setuptools
+# TODO: snap
+# TODO: docs
+# TODO: information for user about new version
+# TODO: windows executable and installer
+# TODO: not trying to download not joined tracks and locked exercises

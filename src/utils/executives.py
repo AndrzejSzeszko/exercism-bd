@@ -107,10 +107,10 @@ def log_in(session, email, password):
     soup = BeautifulSoup(request.content, 'html.parser')
     authenticity_token = soup.find(attrs={'name': 'authenticity_token'})['value']
     credentials = {
-            'user[email]': email,
-            'user[password]': password,
-            'authenticity_token': authenticity_token
-        }
+        'user[email]': email,
+        'user[password]': password,
+        'authenticity_token': authenticity_token
+    }
     request = session.post(LOGIN_URL, data=credentials)
     soup = BeautifulSoup(request.content, 'html.parser')
     user_logged_in = bool(soup.find(class_='logged-in'))

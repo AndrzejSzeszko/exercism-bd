@@ -2,7 +2,7 @@ import os
 import json
 import requests
 
-from utils import (
+from utils.executives import (
     log_in,
     get_all_tracks,
     get_my_tracks,
@@ -23,6 +23,7 @@ def download_exercises(tracks=None, group=None, difficulty=None, status=None):
     user_logged_in = False
     if status or group:
         email, password = get_credentials()
+        
         user_logged_in = log_in(session, email, password)
         if not user_logged_in:
             print('Check if you provided correct credentials (when prompted or via configuration file). \n')
