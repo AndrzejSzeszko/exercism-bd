@@ -25,14 +25,16 @@ ALLOWED_GROUPS = {
     'side': 'side'
 }
 
+# TODO: when only name of program typed it downloads all exercises - there should be warnig about that
 # TODO: logging insted of printing ?
 # TODO: tests
-# TODO: colored help message
 # TODO: verbose/qiuet (decoretors metaprogramming)
 # TODO: statusbar
 # TODO: setuptools
 # TODO: snap
 # TODO: docs
+# TODO: docs
+# TODO: docstrings
 # TODO: information for user about new version
 # TODO: windows executable and installer
 # TODO: not trying to download not joined tracks and locked exercises

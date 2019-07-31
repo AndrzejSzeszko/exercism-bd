@@ -185,9 +185,12 @@ def run_exercism_download(exercises_by_track, group, difficulty, status):
 
             if group_condition_met and difficulty_condition_met and status_condition_met:
                 command = f'exercism download --track={track} --exercise={exercise_name}'
-                output = subprocess.run(command.split(), capture_output=True)
-                exercism_cli_stderr = output.stderr.decode('UTF-8').strip()
-                exercism_cli_stdout = output.stdout.decode('UTF-8').strip()
+                # output = subprocess.run(command.split(), capture_output=True)
+                # exercism_cli_stderr = output.stderr.decode('UTF-8').strip()
+                # exercism_cli_stdout = output.stdout.decode('UTF-8').strip()
+                output = subprocess.run(command.split(), capture_output=True, text=True)
+                exercism_cli_stderr = output.stderr.strip()
+                exercism_cli_stdout = output.stdout.strip()
                 message = f'Track: {track}, Exercise: {exercise_name}\n' \
                           f'{exercism_cli_stderr}\n' \
                           f'{exercism_cli_stdout}\n'

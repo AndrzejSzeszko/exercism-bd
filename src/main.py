@@ -4,7 +4,7 @@ import argparse
 from utils.executives import get_all_tracks
 from utils.ui import (
     bold,
-    underscore
+    underline
 )
 from clint.textui import colored
 from executives import (
@@ -19,9 +19,9 @@ from constants import (
     ALLOWED_GROUPS
 )
 
-allowed_statuses = underscore(bold(", ".join(set(ALLOWED_STATUSES.values()))))
-allowed_difficulties = underscore(bold(", ".join(ALLOWED_DIFFICULTIES)))
-allowed_groups = underscore(bold(", ".join(ALLOWED_GROUPS)))
+allowed_statuses = underline(bold(", ".join(set(ALLOWED_STATUSES.values()))))
+allowed_difficulties = underline(bold(", ".join(ALLOWED_DIFFICULTIES)))
+allowed_groups = underline(bold(", ".join(ALLOWED_GROUPS)))
 
 description          = f'------------------------------------------------------------------------------------------------------------------------\n' \
                        f'This is exercism-cli wrapper allowing to bulk download exercism exercises based on given conditions. \n' \
@@ -105,7 +105,7 @@ filtering_group.add_argument(
     '--tracks',
     type=str,
     metavar='TRACK',
-    choices=get_all_tracks(),
+    # choices=get_all_tracks(),
     required=False,
     nargs='*',
     help=tracks_help,
@@ -170,3 +170,10 @@ if __name__ == '__main__':
             difficulty=args.difficulty,
             status=args.status
         )
+
+    # download_exercises(
+    #     tracks=['java'],
+    #     group=args.group,
+    #     difficulty=args.difficulty,
+    #     status=args.status
+    # )

@@ -4,7 +4,7 @@ def bold(string):
     return f'{start}{string}{end}'
 
 
-def underscore(string):
+def underline(string):
     start = '\033[4m'
     end = '\033[0m'
     return f'{start}{string}{end}'
